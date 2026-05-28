@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+/* Design tokens - Firefly III fork */
+:root {
+    --ff-sidebar-width: 260px;
+    --ff-topbar-height: 56px;
+    --ff-bg: #f8fafc;
+    --ff-sidebar-bg: #1e2535;
+    --ff-sidebar-text: #a8b8d8;
+    --ff-sidebar-text-active: #ffffff;
+    --ff-sidebar-accent: #4f8ef7;
+    --ff-card-bg: #ffffff;
+    --ff-card: #ffffff; /* alias */
+    --ff-border: #e2e8f0;
+    --ff-text-primary: #1a202c;
+    --ff-text: #1a202c; /* alias */
+    --ff-text-muted: #718096;
+    --ff-positive: #38a169;
+    --ff-negative: #e53e3e;
+    --ff-neutral: #718096;
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --ff-bg: #0f1117;
+        --ff-sidebar-bg: #161b27;
+        --ff-card-bg: #1a2035;
+        --ff-card: #1a2035; /* alias */
+        --ff-border: #2d3748;
+        --ff-text-primary: #e2e8f0;
+        --ff-text: #e2e8f0; /* alias */
+        --ff-text-muted: #718096;
+    }
+}
+
+/* Force dark mode via .dark class (set by preferences store) */
+.dark {
+    --ff-bg: #0f1117;
+    --ff-sidebar-bg: #161b27;
+    --ff-card-bg: #1a2035;
+    --ff-card: #1a2035;
+    --ff-border: #2d3748;
+    --ff-text-primary: #e2e8f0;
+    --ff-text: #e2e8f0;
+    --ff-text-muted: #718096;
+}
+
+/* Base */
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background-color: var(--ff-bg);
+    color: var(--ff-text-primary);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--ff-border); border-radius: 3px; }
+
+/* FontAwesome */
+@import "@fortawesome/fontawesome-free/css/all.min.css";

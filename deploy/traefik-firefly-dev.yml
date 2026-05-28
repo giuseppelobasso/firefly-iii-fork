@@ -1,0 +1,29 @@
+# /etc/traefik/conf.d/firefly-dev.yml
+# Firefly III fork — ambiente di test
+# Target: firefly-dev.homelab.local → LXC 192.168.0.X:80
+#
+# Sostituisci 192.168.0.X con l'IP reale del container LXC.
+
+http:
+  routers:
+    firefly-dev:
+      rule: "Host(`firefly-dev.homelab.local`)"
+      entryPoints: [https]
+      tls: {}
+      middlewares:
+        - firefly-dev-headers
+      service: firefly-dev-svc
+
+  middlewares:
+    firefly-dev-headers:
+      headers:
+        customRequestHeaders:
+          X-Forwarded-Proto: "https"
+          X-Forwarded-Host: "firefly-dev.homelab.local"
+          X-Forwarded-Port: "443"
+
+  services:
+    firefly-dev-svc:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.0.X:80"   # <-- cambia con IP reale LXC
