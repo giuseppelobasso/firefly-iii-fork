@@ -16,7 +16,6 @@ export default defineConfig({
             input: [
                 'resources/assets/v2/src/css/app.css',
                 'resources/assets/v2/src/main.js',
-                'resources/assets/v2/src/sass/app.scss',
             ],
             publicDirectory: 'public',
             buildDirectory: 'build/v2',
