@@ -6,7 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Firefly III</title>
     <script>window.__localeId__ = '{{ str_replace('-', '_', app()->getLocale()) }}';</script>
-    @vite(['src/css/app.css', 'src/main.js'], 'build/v2')
+    @vite(['resources/assets/v2/src/css/app.css', 'resources/assets/v2/src/main.js'], 'build/v2')
 </head>
 <body>
     <div id="app"></div>
