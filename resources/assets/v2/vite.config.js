@@ -21,6 +21,7 @@ export default defineConfig({
             input: [
                 'src/css/app.css',
                 'src/main.js',
+                'src/sass/app.scss',
             ],
             publicDirectory: '../../../public',
             buildDirectory: 'build/v2',

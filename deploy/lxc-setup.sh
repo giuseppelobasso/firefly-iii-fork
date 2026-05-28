@@ -13,7 +13,7 @@
 
 set -euo pipefail
 
-REPO_URL="https://github.com/TUO-USERNAME/firefly-iii-fork.git"  # <-- cambia con il tuo fork
+REPO_URL="https://github.com/giuseppelobasso/firefly-iii-fork.git"  # <-- cambia con il tuo fork
 APP_DIR="/opt/firefly"
 APP_URL="https://firefly-dev.homelab.local"
 PHP_VERSION="8.5"
