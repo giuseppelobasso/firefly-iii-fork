@@ -23,6 +23,14 @@ export default defineConfig({
             refresh: true,
         }),
     ],
+    css: {
+        preprocessorOptions: {
+            scss: {
+                // Hide Sass deprecation noise coming from external dependencies.
+                quietDeps: true,
+            },
+        },
+    },
     build: {
         rollupOptions: {
             output: {manualChunks},
