@@ -16,6 +16,7 @@
         "vite": "^6"
     },
     "dependencies": {
+        "admin-lte": "4.0.0-rc7",
         "@fortawesome/fontawesome-free": "^7",
         "chart.js": "^4",
         "chartjs-adapter-date-fns": "^3.0.0",
