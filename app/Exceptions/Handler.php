@@ -207,6 +207,17 @@ class Handler extends ExceptionHandler
             return response()->view('errors.FireflyException', ['exception' => $e, 'debug' => $isDebug], 500);
         }
 
+        // v1 views removed: redirect authenticated web requests to the Vue SPA
+        // Catches: view not found (InvalidArgumentException) AND Vite manifest not found
+        // (RuntimeException when @vite() is called without 'build/v2' directory param)
+        $isV1Fallback = ($e instanceof \InvalidArgumentException && str_contains($e->getMessage(), 'not found'))
+            || ($e instanceof \RuntimeException && str_contains($e->getMessage(), 'Vite manifest not found'));
+        if ($isV1Fallback && !$expectsJson) {
+            Log::debug(sprintf('V1 resource not found (%s), redirecting to SPA index.', $e->getMessage()));
+
+            return redirect(route('index'));
+        }
+
         Log::debug(sprintf('Error "%s" has no Firefly III treatment, parent will handle.', $e::class));
         Log::error($e->getMessage());
 
