@@ -164,7 +164,7 @@
         "post-install-cmd": [
             "@php artisan firefly-iii:instructions install",
             "@php artisan firefly-iii:verify-security-alerts"
-        ],
+        ]
     },
     "config": {
         "preferred-install": "dist",
