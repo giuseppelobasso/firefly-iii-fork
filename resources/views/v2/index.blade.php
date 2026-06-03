@@ -82,6 +82,3 @@
 
 
 @endsection
-@section('scripts')
-    @vite(['resources/assets/v2/src/pages/dashboard/dashboard.js'], 'build/v2')
-@endsection

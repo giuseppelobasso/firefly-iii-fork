@@ -1,7 +1,4 @@
 @extends('layout.v2')
-@section('scripts')
-    @vite(['resources/assets/v2/src/pages/transactions/create.js'], 'build/v2')
-@endsection
 @section('content')
     <div class="app-content">
         <!--begin::Container-->

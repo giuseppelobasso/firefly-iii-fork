@@ -507,6 +507,3 @@
     </div>
 
 @endsection
-@section('scripts')
-    @vite(['resources/assets/v2/src/pages/accounts/index.js'], 'build/v2')
-@endsection
