@@ -206,7 +206,7 @@ ok ".env configurato"
 
 # ─── 9. Dipendenze PHP ────────────────────────────────────────────────────────
 log "Installazione dipendenze PHP (Composer)..."
-composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --quiet
+composer update --no-dev --no-interaction --prefer-dist --optimize-autoloader --quiet
 ok "Composer install completato"
 
 # ─── 10. Dipendenze JS + build frontend ───────────────────────────────────────
