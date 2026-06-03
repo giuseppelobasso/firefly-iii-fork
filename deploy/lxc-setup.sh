@@ -213,12 +213,11 @@ ok "Composer install completato"
 # ─── 10. Dipendenze JS + build frontend ───────────────────────────────────────
 if [ "$DO_BUILD" = true ]; then
     log "Build frontend Vue 3..."
-    # npm install nel workspace (risolve dipendenze in resources/assets/v2/node_modules)
-    cd "$APP_DIR/resources/assets/v2"
-    npm install
-    # vite va eseguito dalla root Laravel (laravel-vite-plugin usa path relativi alla root)
+    # npm install dalla root (workspaces hoist i binari in node_modules/.bin della root)
     cd "$APP_DIR"
-    resources/assets/v2/node_modules/.bin/vite build --config resources/assets/v2/vite.config.js --emptyOutDir
+    npm install
+    # vite dalla root Laravel: laravel-vite-plugin trova artisan e risolve i path correttamente
+    node_modules/.bin/vite build --config resources/assets/v2/vite.config.js --emptyOutDir
     ok "Frontend build completato"
 else
     warn "--no-build: skip npm install e vite build. Assicurati che public/build/v2/ esista."
