@@ -21,7 +21,7 @@ set -euo pipefail
 [[ "$(cat "$0")" == *$'\r'* ]] && { sed -i 's/\r//' "$0"; exec bash "$0" "$@"; }
 
 # ─── Configurazione ──────────────────────────────────────────────────────────
-REPO_URL="https://github.com/giuseppelobasso/firefly-iii-fork.git"  # <-- cambia con il tuo fork
+REPO_URL="https://github.com/TUO-USERNAME/firefly-iii-fork.git"  # <-- cambia con il tuo fork
 APP_DIR="/opt/firefly"
 APP_URL="https://firefly-dev.homelab.local"
 PHP_VERSION="8.5"
@@ -206,15 +206,18 @@ ok ".env configurato"
 
 # ─── 9. Dipendenze PHP ────────────────────────────────────────────────────────
 log "Installazione dipendenze PHP (Composer)..."
+# Usa update (non install) per rigenerare composer.lock in sincronia con composer.json
 composer update --no-dev --no-interaction --prefer-dist --optimize-autoloader --quiet
 ok "Composer install completato"
 
 # ─── 10. Dipendenze JS + build frontend ───────────────────────────────────────
 if [ "$DO_BUILD" = true ]; then
     log "Build frontend Vue 3..."
-    cd "$APP_DIR"
+    # Entrare nel workspace evita problemi di risoluzione moduli con vite 8 + npm workspaces
+    cd "$APP_DIR/resources/assets/v2"
     npm install
-    node_modules/.bin/vite build --config resources/assets/v2/vite.config.js --emptyOutDir
+    npx vite build --emptyOutDir
+    cd "$APP_DIR"
     ok "Frontend build completato"
 else
     warn "--no-build: skip npm install e vite build. Assicurati che public/build/v2/ esista."
