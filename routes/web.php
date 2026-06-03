@@ -1471,5 +1471,5 @@ Route::group(
 // SPA catch-all: any authenticated route not matched above serves the Vue 3 shell.
 // Vue Router handles client-side routing from this point.
 Route::middleware(['user-full-auth'])->get('/{any}', static function () {
-    return view('v2.layout.v2');
+    return view('layout.v2');
 })->where('any', '^(?!api|oauth|login|logout|register|password|sanctum|_ignition|_debugbar|build).*$');
