@@ -1,6 +1,6 @@
 @extends('layout.v2')
 @section('scripts')
-    @vite(['src/pages/administrations/create.js'])
+    @vite(['resources/assets/v2/src/pages/administrations/create.js'], 'build/v2')
 @endsection
 @section('content')
     <div class="app-content">

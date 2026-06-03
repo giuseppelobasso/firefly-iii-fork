@@ -508,5 +508,5 @@
 
 @endsection
 @section('scripts')
-    @vite(['src/pages/accounts/index.js'])
+    @vite(['resources/assets/v2/src/pages/accounts/index.js'], 'build/v2')
 @endsection
