@@ -81,11 +81,29 @@
 @endsection
 @section('scripts')
     <script nonce="{{ $JS_NONCE }}">
-        var route = '{{ route('register') }}';
-        var passwordLengthError = '{{ blade_escape_js((string)trans('validation.min.string', ['attribute' => 'password', 'min' => 16])) }}';
-        var passwordMatchError = '{{ blade_escape_js(trans('validation.confirmed', ['attribute' => 'password'])) }}';
-        var waitForVerify = '{{ blade_escape_js(trans('validation.verifying_password')) }}';
-        var needSecurePassword = '{{ blade_escape_js(trans('validation.secure_password')) }}';
-        </script>
-    <script nonce="{{$JS_NONCE}}" src="v1/js/ff/auth/register.js"></script>
+        (function () {
+            'use strict';
+            var passwordLengthError = '{{ blade_escape_js((string)trans('validation.min.string', ['attribute' => 'password', 'min' => 16])) }}';
+            var passwordMatchError  = '{{ blade_escape_js(trans('validation.confirmed', ['attribute' => 'password'])) }}';
+            var form = document.querySelector('form');
+            if (!form) return;
+
+            form.addEventListener('submit', function (e) {
+                var pwd  = form.querySelector('[name="password"]');
+                var conf = form.querySelector('[name="password_confirmation"]');
+                var errDiv  = document.getElementById('client-errors');
+                var errList = document.getElementById('client-errors-list');
+                var errors = [];
+
+                if (pwd && pwd.value.length < 16)          errors.push(passwordLengthError);
+                if (pwd && conf && pwd.value !== conf.value) errors.push(passwordMatchError);
+
+                if (errors.length) {
+                    e.preventDefault();
+                    errList.innerHTML = errors.map(function (m) { return '<li>' + m + '</li>'; }).join('');
+                    errDiv.style.display = '';
+                }
+            });
+        })();
+    </script>
 @endsection
