@@ -2,7 +2,7 @@
 @section('content')
 
     @if($errors->any())
-        <div class="alert alert-danger" role="alert">
+        <div class="ff-alert ff-alert-danger">
             <ul>
             @foreach($errors->getBags() as $bag)
                 @foreach($bag->all() as $error)
@@ -14,35 +14,30 @@
     @endif
 
     @if(session()->has('error'))
-        <div class="alert alert-danger" role="alert">
-            {{ session('error') }}
-        </div>
+        <div class="ff-alert ff-alert-danger">{{ session('error') }}</div>
     @endif
 
+    <div class="ff-card ff-card--elevated" style="padding: 1.5rem;">
+        <p class="ff-session-subtitle">{{ trans('firefly.two_factor_welcome', ['user' => auth()->user()->email]) }}</p>
+        <p class="ff-session-subtitle" style="margin-top:-0.75rem;">{{ __('firefly.two_factor_enter_code') }}</p>
 
-    <div class="card">
-        <div class="card-body login-card-body">
-            <p class="login-box-msg">{{ trans('firefly.two_factor_welcome', ['user' => auth()->user()->email]) }}</p>
-            <p class="login-box-msg">{{ __('firefly.two_factor_enter_code') }}</p>
+        <form action="{{ route('two-factor.submit') }}" method="post">
+            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+            <div class="ff-input-group">
+                <input type="text" autofocus required name="one_time_password"
+                       inputmode="numeric" autocomplete="one-time-code"
+                       class="ff-input" placeholder="{{ __('firefly.two_factor_code_here') }}">
+                <span class="ff-input-icon"><em class="fa-solid fa-calculator"></em></span>
+            </div>
+            <button type="submit" class="ff-btn ff-btn-primary ff-btn-full">
+                {{ __('firefly.authenticate') }}
+            </button>
+        </form>
 
-            <form action="{{ route('two-factor.submit') }}" method="post">
-                <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
-                <div class="input-group mb-3">
-                    <input type="text" autofocus required name="one_time_password" inputmode="numeric" autocomplete="one-time-code" class="form-control" placeholder="{{ __('firefly.two_factor_code_here') }}" autofocus />
-                    <div class="input-group-text"> <em class="fa-solid fa-calculator"></em> </div>
-                </div>
-                <div class="row">
-                    <!-- /.col -->
-                    <div class="col">
-                        <button type="submit" class="btn btn-primary btn-block">{{ __('firefly.authenticate') }}</button>
-                    </div>
-                    <!-- /.col -->
-                </div>
-            </form>
-            <p class="mb-1 mt-3">
-                <a href="{{ route('two-factor.lost') }}">{{ __('firefly.two_factor_forgot') }}</a>
-            </p>
+        <div class="ff-session-links">
+            <a class="ff-session-link" href="{{ route('two-factor.lost') }}">{{ __('firefly.two_factor_forgot') }}</a>
         </div>
     </div>
 
 @endsection
+

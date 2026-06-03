@@ -1,16 +1,12 @@
 @extends('layout.v2.session')
 @section('content')
 
-
-    {{-- SUCCESS MESSAGE (ALWAYS SINGULAR) --}}
     @if(session()->has('success'))
-        <div class="alert alert-success" role="alert">
-            <strong>{{ trans('firefly.flash_success') }}</strong> {{ session('success') }}
-        </div>
+        <div class="ff-alert ff-alert-success">{{ session('success') }}</div>
     @endif
 
     @if($errors->any())
-        <div class="alert alert-danger" role="alert">
+        <div class="ff-alert ff-alert-danger">
             <ul>
             @foreach($errors->getBags() as $bag)
                 @foreach($bag->all() as $error)
@@ -21,60 +17,53 @@
         </div>
     @endif
 
-    <div id="client-errors" class="alert alert-danger" role="alert" style="display:none;">
+    <div id="client-errors" class="ff-alert ff-alert-danger" style="display:none;">
         <ul id="client-errors-list"></ul>
     </div>
 
-    <div class="card">
-        <div class="card-body register-card-body">
-            <p class="login-box-msg">{{ trans('firefly.register_new_account') }}</p>
+    <div class="ff-card ff-card--elevated" style="padding: 1.5rem;">
+        <p class="ff-session-subtitle">{{ trans('firefly.register_new_account') }}</p>
 
-            <form action="{{ route('register') }}" method="post">
-                <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                <input type="hidden" name="invite_code" value="{{ $inviteCode ?? '' }}">
-                <div class="input-group mb-3">
-                    <input type="email" name="email" autofocus required value="{{ $email }}" class="form-control"
-                           placeholder="{{ trans('form.email') }}"/>
-                    <div class="input-group-text"> <em class="fa-solid fa-envelope"></em> </div>
-                </div>
-                <div class="input-group mb-3">
-                    <input type="password" autocomplete="new-password" required class="form-control"
-                           placeholder="{{ trans('form.password') }}" minlength="16" name="password"/>
-                    <div class="input-group-text"> <em class="fa-solid fa-lock"></em> </div>
-                </div>
-                <div class="input-group mb-3">
-                    <input type="password" autocomplete="new-password" minlength="16" required class="form-control"
-                           placeholder="{{ trans('form.password_confirmation') }}" name="password_confirmation"/>
-                    <div class="input-group-text"> <em class="fa-solid fa-lock"></em> </div>
-                </div>
-                <div class="row">
-                    <div class="col-12">
-                            <input type="checkbox" id="verify_password" checked name="verify_password" value="1">
-                            <label for="verify_password">
-                                {{ trans('form.verify_password') }}
-                                <a href="#"
-                                    data-bs-toggle="modal" data-bs-target="#passwordModal"
-                                ><span
-                                        class="fa fa-fw fa-question-circle"></span></a>
-                            </label>
-                    </div>
-                </div>
-                <div class="row mt-3">
-                    <div class="col-4 offset-8">
-                        <button type="submit" class="btn btn-primary btn-block">Register</button>
-                    </div>
-                </div>
-            </form>
+        <form action="{{ route('register') }}" method="post">
+            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="invite_code" value="{{ $inviteCode ?? '' }}">
 
-            <p class="mb-1 mt-3">
-                <a href="{{ route('login') }}">{{ trans('firefly.want_to_login') }}</a>
-            </p>
-            <p class="mb-0">
-                <a href="{{ route('password.reset.request') }}">{{ trans('firefly.forgot_my_password') }}</a>
-            </p>
+            <div class="ff-input-group">
+                <input type="email" name="email" autofocus required value="{{ $email }}"
+                       class="ff-input" placeholder="{{ trans('form.email') }}">
+                <span class="ff-input-icon"><em class="fa-solid fa-envelope"></em></span>
+            </div>
+
+            <div class="ff-input-group">
+                <input type="password" autocomplete="new-password" required class="ff-input"
+                       placeholder="{{ trans('form.password') }}" minlength="16" name="password">
+                <span class="ff-input-icon"><em class="fa-solid fa-lock"></em></span>
+            </div>
+
+            <div class="ff-input-group">
+                <input type="password" autocomplete="new-password" minlength="16" required class="ff-input"
+                       placeholder="{{ trans('form.password_confirmation') }}" name="password_confirmation">
+                <span class="ff-input-icon"><em class="fa-solid fa-lock"></em></span>
+            </div>
+
+            <label class="ff-form-check" style="margin-bottom: 1.25rem;">
+                <input type="checkbox" id="verify_password" checked name="verify_password" value="1">
+                {{ trans('form.verify_password') }}
+                <a href="#" class="ff-session-link" onclick="document.getElementById('passwordModal').showModal(); return false;">
+                    <em class="fa fa-fw fa-question-circle"></em>
+                </a>
+            </label>
+
+            <button type="submit" class="ff-btn ff-btn-primary ff-btn-full">
+                {{ trans('firefly.register') }}
+            </button>
+        </form>
+
+        <div class="ff-session-links">
+            <a class="ff-session-link" href="{{ route('login') }}">{{ trans('firefly.want_to_login') }}</a>
+            <a class="ff-session-link" href="{{ route('password.reset.request') }}">{{ trans('firefly.forgot_my_password') }}</a>
         </div>
-        <!-- /.form-box -->
-    </div><!-- /.card -->
+    </div>
 
     @include('partials.password-modal')
 
@@ -85,19 +74,17 @@
             'use strict';
             var passwordLengthError = '{{ blade_escape_js((string)trans('validation.min.string', ['attribute' => 'password', 'min' => 16])) }}';
             var passwordMatchError  = '{{ blade_escape_js(trans('validation.confirmed', ['attribute' => 'password'])) }}';
-            var form = document.querySelector('form');
+            var form    = document.querySelector('form');
+            var errDiv  = document.getElementById('client-errors');
+            var errList = document.getElementById('client-errors-list');
             if (!form) return;
 
             form.addEventListener('submit', function (e) {
                 var pwd  = form.querySelector('[name="password"]');
                 var conf = form.querySelector('[name="password_confirmation"]');
-                var errDiv  = document.getElementById('client-errors');
-                var errList = document.getElementById('client-errors-list');
                 var errors = [];
-
-                if (pwd && pwd.value.length < 16)          errors.push(passwordLengthError);
+                if (pwd && pwd.value.length < 16)           errors.push(passwordLengthError);
                 if (pwd && conf && pwd.value !== conf.value) errors.push(passwordMatchError);
-
                 if (errors.length) {
                     e.preventDefault();
                     errList.innerHTML = errors.map(function (m) { return '<li>' + m + '</li>'; }).join('');
@@ -107,3 +94,4 @@
         })();
     </script>
 @endsection
+
