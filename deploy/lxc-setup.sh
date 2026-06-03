@@ -21,7 +21,7 @@ set -euo pipefail
 [[ "$(cat "$0")" == *$'\r'* ]] && { sed -i 's/\r//' "$0"; exec bash "$0" "$@"; }
 
 # ─── Configurazione ──────────────────────────────────────────────────────────
-REPO_URL="https://github.com/TUO-USERNAME/firefly-iii-fork.git"  # <-- cambia con il tuo fork
+REPO_URL="https://github.com/giuseppelobasso/firefly-iii-fork.git"  # <-- cambia con il tuo fork
 APP_DIR="/opt/firefly"
 APP_URL="https://firefly-dev.homelab.local"
 PHP_VERSION="8.5"
@@ -213,11 +213,12 @@ ok "Composer install completato"
 # ─── 10. Dipendenze JS + build frontend ───────────────────────────────────────
 if [ "$DO_BUILD" = true ]; then
     log "Build frontend Vue 3..."
-    # Entrare nel workspace evita problemi di risoluzione moduli con vite 8 + npm workspaces
+    # npm install nel workspace (risolve dipendenze in resources/assets/v2/node_modules)
     cd "$APP_DIR/resources/assets/v2"
     npm install
-    npx vite build --emptyOutDir
+    # vite va eseguito dalla root Laravel (laravel-vite-plugin usa path relativi alla root)
     cd "$APP_DIR"
+    resources/assets/v2/node_modules/.bin/vite build --config resources/assets/v2/vite.config.js --emptyOutDir
     ok "Frontend build completato"
 else
     warn "--no-build: skip npm install e vite build. Assicurati che public/build/v2/ esista."
