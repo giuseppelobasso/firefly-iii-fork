@@ -100,7 +100,6 @@
         "predis/predis": "^3",
         "psr/log": "<4",
         "ramsey/uuid": "^4.7",
-        "rcrowe/twigbridge": "^0.14",
         "spatie/laravel-html": "^3.13",
         "spatie/laravel-ignition": "^2",
         "spatie/period": "^2.4",
@@ -110,23 +109,9 @@
         "thecodingmachine/safe": "^3.1"
     },
     "require-dev": {
-        "barryvdh/laravel-ide-helper": "^3",
-        "carthage-software/mago": "^1.24.0",
-        "driftingly/rector-laravel": "^2.0",
-        "ergebnis/phpstan-rules": "^2",
         "fakerphp/faker": "1.*",
         "filp/whoops": "2.*",
-        "fruitcake/laravel-debugbar": "^4.0",
-        "larastan/larastan": "^3",
-        "laravel-json-api/testing": "^3.0",
-        "mockery/mockery": "1.*",
-        "phpstan/extension-installer": "^1.4",
-        "phpstan/phpstan": "^2",
-        "phpstan/phpstan-deprecation-rules": "^2",
-        "phpstan/phpstan-strict-rules": "^2",
-        "phpunit/phpunit": "^13",
-        "rector/rector": "^2.3",
-        "thecodingmachine/phpstan-safe-rule": "^1.4"
+        "fruitcake/laravel-debugbar": "^4.0"
     },
     "replace": {
         "symfony/polyfill-php54": "*",
@@ -144,11 +129,6 @@
             "Domain\\": "domain/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Tests\\": "tests/"
         }
     },
     "extra": {
@@ -174,7 +154,6 @@
         "post-update-cmd": [
             "@php artisan config:clear",
             "@php artisan route:clear",
-            "@php artisan twig:clean",
             "@php artisan view:clear",
             "@php artisan clear-compiled",
             "@php artisan cache:clear",
@@ -186,15 +165,6 @@
             "@php artisan firefly-iii:instructions install",
             "@php artisan firefly-iii:verify-security-alerts"
         ],
-        "unit-test": [
-            "@php vendor/bin/phpunit -c phpunit.xml --testsuite unit --no-coverage"
-        ],
-        "integration-test": [
-            "@php vendor/bin/phpunit -c phpunit.xml --testsuite integration --no-coverage"
-        ],
-        "coverage": [
-            "@php vendor/bin/phpunit -c phpunit.xml"
-        ]
     },
     "config": {
         "preferred-install": "dist",

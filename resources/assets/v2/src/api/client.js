@@ -211,8 +211,40 @@ export const insight = {
     },
 };
 
+// ─── Rules ───────────────────────────────────────────────────────────────────
+export const rules = {
+    list: (params = {}) => http.get('/rules', { params }),
+    show: (id) => http.get(`/rules/${id}`),
+    store: (data) => http.post('/rules', data),
+    update: (id, data) => http.put(`/rules/${id}`, data),
+    destroy: (id) => http.delete(`/rules/${id}`),
+    test: (id, params = {}) => http.get(`/rules/${id}/test`, { params }),
+    trigger: (id) => http.post(`/rules/${id}/trigger`),
+};
+
+// ─── Rule Groups ──────────────────────────────────────────────────────────────
+export const ruleGroups = {
+    list: (params = {}) => http.get('/rule-groups', { params }),
+    show: (id) => http.get(`/rule-groups/${id}`),
+    store: (data) => http.post('/rule-groups', data),
+    update: (id, data) => http.put(`/rule-groups/${id}`, data),
+    destroy: (id) => http.delete(`/rule-groups/${id}`),
+    rules: (id, params = {}) => http.get(`/rule-groups/${id}/rules`, { params }),
+    trigger: (id) => http.post(`/rule-groups/${id}/trigger`),
+};
+
+// ─── Recurring Transactions ───────────────────────────────────────────────────
+export const recurring = {
+    list: (params = {}) => http.get('/recurrences', { params }),
+    show: (id) => http.get(`/recurrences/${id}`),
+    store: (data) => http.post('/recurrences', data),
+    update: (id, data) => http.put(`/recurrences/${id}`, data),
+    destroy: (id) => http.delete(`/recurrences/${id}`),
+    transactions: (id, params = {}) => http.get(`/recurrences/${id}/transactions`, { params }),
+};
+
 export default {
     summary, accounts, transactions, budgets, categories, tags,
     piggyBanks, bills, currencies, preferences, about, search,
-    autocomplete, charts, insight,
+    autocomplete, charts, insight, rules, ruleGroups, recurring,
 };

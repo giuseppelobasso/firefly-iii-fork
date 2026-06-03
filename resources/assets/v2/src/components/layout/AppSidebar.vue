@@ -42,6 +42,12 @@
             </div>
 
             <div class="ff-sidebar-section">
+                <p class="ff-sidebar-section-label">Automation</p>
+                <NavItem to="/rules" icon="fa-solid fa-wand-magic-sparkles" label="Rules" />
+                <NavItem to="/recurring" icon="fa-solid fa-clock-rotate-left" label="Recurring" />
+            </div>
+
+            <div class="ff-sidebar-section">
                 <p class="ff-sidebar-section-label">Reports</p>
                 <NavItem to="/reports" icon="fa-solid fa-chart-bar" label="Reports" />
                 <NavItem to="/tags" icon="fa-solid fa-tag" label="Tags" />

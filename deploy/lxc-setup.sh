@@ -1,36 +1,110 @@
 #!/bin/bash
 # deploy/lxc-setup.sh
-# Setup script per LXC Debian 12 — Firefly III fork (test environment)
-# Target: firefly-dev.homelab.local (192.168.0.X)
+# Setup / reinstallazione pulita — Firefly III fork (LXC Debian 12)
+# Target: firefly-dev.homelab.local
 #
-# Ispirato a: https://github.com/community-scripts/ProxmoxVE/blob/main/install/firefly-install.sh
+# Uso — prima installazione:
+#   pct push <CTID> deploy/lxc-setup.sh /root/lxc-setup.sh
+#   ssh root@<LXC-IP> bash /root/lxc-setup.sh
 #
-# Uso:
-#   1. Crea LXC Debian 12 su Proxmox (1GB RAM min, 10GB storage)
-#   2. Copia questo script nel container:
-#        pct push <CTID> deploy/lxc-setup.sh /root/lxc-setup.sh
-#   3. Sul container: bash /root/lxc-setup.sh
+# Uso — reinstallazione pulita (azzera DB e app, riparte da zero):
+#   ssh root@<LXC-IP> bash /root/lxc-setup.sh --reinstall
+#
+# Flag disponibili:
+#   --reinstall   Cancella APP_DIR e DB, poi reinstalla tutto da capo
+#   --no-build    Salta npm install + vite build (utile se vuoi buildare a mano)
+#   --pull-only   Solo git pull + composer + artisan migrations, niente reinstall infrastruttura
 
 set -euo pipefail
 
-REPO_URL="https://github.com/giuseppelobasso/firefly-iii-fork.git"  # <-- cambia con il tuo fork
+# Auto-fix CRLF (file creato su Windows): re-esegue se stesso dopo la pulizia
+[[ "$(cat "$0")" == *$'\r'* ]] && { sed -i 's/\r//' "$0"; exec bash "$0" "$@"; }
+
+# ─── Configurazione ──────────────────────────────────────────────────────────
+REPO_URL="https://github.com/TUO-USERNAME/firefly-iii-fork.git"  # <-- cambia con il tuo fork
 APP_DIR="/opt/firefly"
 APP_URL="https://firefly-dev.homelab.local"
 PHP_VERSION="8.5"
 MARIADB_DB="firefly"
 MARIADB_USER="firefly"
+# In reinstall la password viene letta da /root/.firefly_db_credentials se esiste
 MARIADB_PASS="$(openssl rand -base64 20 | tr -d '/+=')"
 
 log() { echo -e "\n\033[1;34m>>> $1\033[0m"; }
 ok()  { echo -e "\033[1;32m✓ $1\033[0m"; }
+warn(){ echo -e "\033[1;33m! $1\033[0m"; }
 err() { echo -e "\033[1;31m✗ $1\033[0m" >&2; exit 1; }
+
+# ─── Parsing flag ────────────────────────────────────────────────────────────
+DO_REINSTALL=false
+DO_BUILD=true
+PULL_ONLY=false
+
+for arg in "$@"; do
+    case "$arg" in
+        --reinstall)  DO_REINSTALL=true  ;;
+        --no-build)   DO_BUILD=false     ;;
+        --pull-only)  PULL_ONLY=true     ;;
+        *) warn "Flag non riconosciuto: $arg" ;;
+    esac
+done
+
+# ─── Modalità pull-only: aggiornamento rapido senza reinstall infrastruttura ─
+if [ "$PULL_ONLY" = true ]; then
+    log "[pull-only] git pull + composer + migrations"
+    cd "$APP_DIR"
+    git pull --quiet
+    composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --quiet
+    php artisan firefly:upgrade-database
+    php artisan config:cache --quiet
+    php artisan route:cache  --quiet
+    php artisan view:cache   --quiet
+    chown -R www-data:www-data "$APP_DIR/storage" "$APP_DIR/bootstrap/cache"
+    ok "[pull-only] completato"
+    exit 0
+fi
+
+# ─── Modalità reinstall: azzera DB e directory app ───────────────────────────
+if [ "$DO_REINSTALL" = true ]; then
+    log "[reinstall] Pulizia installazione precedente..."
+
+    # Riutilizza la stessa password se disponibile (evita di cambiare credenziali)
+    if [ -f /root/.firefly_db_credentials ]; then
+        SAVED_PASS="$(grep '^DB_PASSWORD=' /root/.firefly_db_credentials | cut -d= -f2)"
+        if [ -n "$SAVED_PASS" ]; then
+            MARIADB_PASS="$SAVED_PASS"
+            warn "Riutilizzo password DB esistente da /root/.firefly_db_credentials"
+        fi
+    fi
+
+    # Drop + ricrea DB
+    mysql -u root << SQL
+DROP DATABASE IF EXISTS \`${MARIADB_DB}\`;
+CREATE DATABASE \`${MARIADB_DB}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER IF NOT EXISTS '${MARIADB_USER}'@'localhost' IDENTIFIED BY '${MARIADB_PASS}';
+GRANT ALL PRIVILEGES ON \`${MARIADB_DB}\`.* TO '${MARIADB_USER}'@'localhost';
+FLUSH PRIVILEGES;
+SQL
+    ok "Database ${MARIADB_DB} ricreato"
+
+    # Rimuovi directory app (preserva backup se esiste)
+    if [ -d "$APP_DIR" ]; then
+        rm -rf "$APP_DIR"
+        ok "$APP_DIR eliminato"
+    fi
+
+    # Rimuovi vhost Apache
+    a2dissite firefly-dev.conf 2>/dev/null || true
+    rm -f /etc/apache2/sites-available/firefly-dev.conf
+    ok "VirtualHost Apache rimosso (verrà ricreato)"
+fi
 
 # ─── 1. Sistema base ───────────────────────────────────────────────────────────
 log "Aggiornamento sistema..."
 apt-get update -qq && apt-get upgrade -y -qq
 apt-get install -y -qq \
     curl wget git unzip gnupg2 lsb-release ca-certificates \
-    software-properties-common apt-transport-https openssl
+    apt-transport-https openssl
 ok "Sistema aggiornato"
 
 # ─── 2. PHP 8.5 (Sury repo) ────────────────────────────────────────────────────
@@ -43,7 +117,7 @@ apt-get install -y -qq \
     "php${PHP_VERSION}" "php${PHP_VERSION}-cli" \
     "php${PHP_VERSION}-mbstring" "php${PHP_VERSION}-xml" "php${PHP_VERSION}-curl" \
     "php${PHP_VERSION}-zip" "php${PHP_VERSION}-mysql" "php${PHP_VERSION}-intl" \
-    "php${PHP_VERSION}-bcmath" "php${PHP_VERSION}-gd" "php${PHP_VERSION}-opcache"
+    "php${PHP_VERSION}-bcmath" "php${PHP_VERSION}-gd"
 ok "PHP $(php -r 'echo PHP_VERSION;')"
 
 # ─── 3. Composer ──────────────────────────────────────────────────────────────
@@ -63,12 +137,15 @@ apt-get install -y -qq mariadb-server
 systemctl enable mariadb
 systemctl start mariadb
 
-mysql -u root << SQL
+# In --reinstall il DB è già stato ricreato sopra; qui gestiamo solo first-install
+if [ "$DO_REINSTALL" = false ]; then
+    mysql -u root << SQL
 CREATE DATABASE IF NOT EXISTS \`${MARIADB_DB}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE USER IF NOT EXISTS '${MARIADB_USER}'@'localhost' IDENTIFIED BY '${MARIADB_PASS}';
 GRANT ALL PRIVILEGES ON \`${MARIADB_DB}\`.* TO '${MARIADB_USER}'@'localhost';
 FLUSH PRIVILEGES;
 SQL
+fi
 
 # Salva credenziali per riferimento post-install
 cat > /root/.firefly_db_credentials << CREDS
@@ -91,10 +168,11 @@ ok "Apache $(apache2 -v 2>&1 | head -1)"
 log "Clone repository..."
 if [ -d "$APP_DIR/.git" ]; then
     cd "$APP_DIR" && git pull --quiet
+    ok "Repository aggiornato (git pull)"
 else
     git clone --quiet "$REPO_URL" "$APP_DIR"
+    ok "Repository clonato in $APP_DIR"
 fi
-ok "Repository in $APP_DIR"
 
 # ─── 8. .env ──────────────────────────────────────────────────────────────────
 log "Configurazione .env..."
@@ -132,15 +210,23 @@ composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader -
 ok "Composer install completato"
 
 # ─── 10. Dipendenze JS + build frontend ───────────────────────────────────────
-log "Build frontend Vue 3..."
-cd "$APP_DIR/resources/assets/v2"
-npm ci --silent
-npm run build
-ok "Frontend build completato"
+if [ "$DO_BUILD" = true ]; then
+    log "Build frontend Vue 3..."
+    cd "$APP_DIR"
+    npm install
+    node_modules/.bin/vite build --config resources/assets/v2/vite.config.js --emptyOutDir
+    ok "Frontend build completato"
+else
+    warn "--no-build: skip npm install e vite build. Assicurati che public/build/v2/ esista."
+fi
 
 # ─── 11. Setup Laravel + Firefly ──────────────────────────────────────────────
 log "Setup Laravel e Firefly III..."
 cd "$APP_DIR"
+
+# Permessi storage prima degli artisan (evita log owned da root)
+chown -R www-data:www-data "$APP_DIR/storage" "$APP_DIR/bootstrap/cache"
+chmod -R 775 "$APP_DIR/storage" "$APP_DIR/bootstrap/cache"
 
 php artisan key:generate --no-interaction --quiet
 
@@ -155,9 +241,19 @@ php artisan config:cache  --quiet
 php artisan route:cache   --quiet
 php artisan view:cache    --quiet
 
-# Permessi
+# Genera i18n JSON per il frontend v2 (i18next li carica da public/v2/i18n/)
+mkdir -p "$APP_DIR/public/v2/i18n"
+php -r "
+\$out = [];
+foreach (glob('resources/locales/en_US/*.json') as \$f) {
+    \$data = json_decode(file_get_contents(\$f), true);
+    if (is_array(\$data)) \$out = array_merge(\$out, \$data);
+}
+file_put_contents('public/v2/i18n/en.json', json_encode(\$out, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+"
+
+# Ripristina permessi (artisan può creare file come root durante le run)
 chown -R www-data:www-data "$APP_DIR/storage" "$APP_DIR/bootstrap/cache"
-chmod -R 775 "$APP_DIR/storage" "$APP_DIR/bootstrap/cache"
 chown www-data:www-data "$APP_DIR/storage/oauth-"*.key 2>/dev/null || true
 ok "Laravel + Firefly III configurato"
 

@@ -1,29 +1,23 @@
-import {defineStore} from 'pinia';
-import {categories as api, insight as insightApi} from '../api/client.js';
+import { defineStore } from 'pinia';
+import { tags as api } from '../api/client.js';
 
-export const useCategoriesStore = defineStore('categories', {
+export const useTagsStore = defineStore('tags', {
     state: () => ({
         list: [],
         current: null,
-        insight: [],
         loading: false,
         error: null,
         page: 1,
         total: 0,
-        perPage: 50,
+        perPage: 100,
     }),
 
-    getters: {
-        totalPages: (state) => Math.max(1, Math.ceil(state.total / state.perPage)),
-    },
-
     actions: {
-        async load(page = null) {
-            if (page !== null) this.page = page;
+        async load(params = {}) {
             this.loading = true;
             this.error = null;
             try {
-                const res = await api.list({page: this.page, limit: this.perPage});
+                const res = await api.list({ page: this.page, limit: this.perPage, ...params });
                 this.list = res.data.data ?? [];
                 this.total = res.data.meta?.pagination?.total ?? this.list.length;
             } catch (e) {
@@ -47,15 +41,6 @@ export const useCategoriesStore = defineStore('categories', {
             }
         },
 
-        async loadInsight(start, end) {
-            try {
-                const res = await insightApi.expense.byCategory({start, end});
-                this.insight = res.data ?? [];
-            } catch (e) {
-                this.insight = [];
-            }
-        },
-
         async store(data) {
             const res = await api.store(data);
             await this.load();
@@ -64,7 +49,7 @@ export const useCategoriesStore = defineStore('categories', {
 
         async update(id, data) {
             const res = await api.update(id, data);
-            const idx = this.list.findIndex((c) => c.id === String(id));
+            const idx = this.list.findIndex((t) => t.id === String(id));
             if (idx !== -1) this.list[idx] = res.data.data;
             this.current = res.data.data;
             return res.data.data;
@@ -72,7 +57,7 @@ export const useCategoriesStore = defineStore('categories', {
 
         async destroy(id) {
             await api.destroy(id);
-            this.list = this.list.filter((c) => c.id !== String(id));
+            this.list = this.list.filter((t) => t.id !== String(id));
             this.total = Math.max(0, this.total - 1);
         },
     },

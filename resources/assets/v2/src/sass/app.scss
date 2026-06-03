@@ -18,24 +18,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-$color-mode-type: media-query;
-$link-decoration: none !default;
-$font-family-sans-serif: "Roboto", sans-serif;
-
-$danger: #CD5029 !default;
-$primary: #1E6581 !default;
-$success: #64B624 !default;
-
-// admin LTE
-@use "admin-lte/src/scss/adminlte" with (
-    $color-mode-type: $color-mode-type,
-    $link-decoration: $link-decoration,
-    $font-family-sans-serif: $font-family-sans-serif,
-    $danger: $danger,
-    $primary: $primary,
-    $success: $success
-);
-
+// FontAwesome (unico framework CSS rimasto — AdminLTE/Bootstrap rimossi in FASE 9)
 @use '@fortawesome/fontawesome-free/scss/variables' with (
   $font-path: "@fortawesome/fontawesome-free/webfonts"
 );

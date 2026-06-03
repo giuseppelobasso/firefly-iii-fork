@@ -16,6 +16,7 @@
         <div v-else class="ff-boot-loader">
             <span class="ff-spinner"></span>
         </div>
+        <FfToast />
     </div>
 </template>
 
@@ -24,6 +25,7 @@ import {ref, onMounted} from 'vue';
 import {RouterView} from 'vue-router';
 import AppSidebar from './components/layout/AppSidebar.vue';
 import AppTopbar from './components/layout/AppTopbar.vue';
+import FfToast from './components/ui/FfToast.vue';
 import {usePreferencesStore} from './stores/preferences.js';
 
 const prefs = usePreferencesStore();
