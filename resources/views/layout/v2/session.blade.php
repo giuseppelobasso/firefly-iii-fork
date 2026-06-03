@@ -62,7 +62,15 @@
         })()
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     @vite(['resources/assets/v2/src/sass/app.scss'], 'build/v2')
+    <style>
+        body.login-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .login-box { width: 360px; }
+        .login-logo { text-align: center; margin-bottom: 1rem; }
+        .login-logo img { display: block; margin: 0 auto 0.5rem; }
+        .register-card-body, .login-card-body { padding: 1.5rem; }
+    </style>
 </head>
 
 <body class="login-page bg-body-secondary">
@@ -76,5 +84,6 @@
 </div>
 
 @yield('scripts')
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc4s9bIOgUxi8T/jzmh3WMQlHFLBBBP+TwE0wGCXb4L" crossorigin="anonymous"></script>
 </body>
 </html>
