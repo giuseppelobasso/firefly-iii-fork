@@ -1,4 +1,4 @@
-@extends('layout.v2')
+@extends('layout.v2.session')
 @section('content')
 <div class="view" style="max-width: 640px; padding: 1.5rem;">
 
