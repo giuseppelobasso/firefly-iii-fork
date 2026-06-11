@@ -37,9 +37,9 @@
                 <tbody>
                     <tr v-for="acc in store.list" :key="acc.id">
                         <td>
-                            <RouterLink :to="`/accounts/${route.params.type}`" class="ff-link">
+                            <span class="ff-link">
                                 {{ acc.attributes?.name }}
-                            </RouterLink>
+                            </span>
                         </td>
                         <td class="text-muted">{{ acc.attributes?.iban ?? '—' }}</td>
                         <td :class="balanceClass(acc)">

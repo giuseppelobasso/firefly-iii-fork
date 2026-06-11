@@ -171,7 +171,7 @@ export const autocomplete = {
 // ─── Charts ───────────────────────────────────────────────────────────────────
 export const charts = {
     accountOverview: (params = {}) => http.get('/chart/account/overview', {params}),
-    accountDashboard: (params = {}) => http.get('/chart/account/dashboard', {params}),
+    accountDashboard: (params = {}) => http.get('/chart/account/overview', {params}),
     budgetOverview: (params = {}) => http.get('/chart/budget/overview', {params}),
     categoryOverview: (params = {}) => http.get('/chart/category/overview', {params}),
     balance: (params = {}) => http.get('/chart/balance/balance', {params}),
