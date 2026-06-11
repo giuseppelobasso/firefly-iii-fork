@@ -35,15 +35,15 @@
                     >
                         <td class="tbl-name">{{ rec.attributes?.title }}</td>
                         <td>
-                            <FfBadge :variant="typeVariant(rec.attributes?.transactions?.[0]?.type)">
-                                {{ rec.attributes?.transactions?.[0]?.type ?? '—' }}
+                            <FfBadge :variant="typeVariant(rec.attributes?.type)">
+                                {{ rec.attributes?.type ?? '—' }}
                             </FfBadge>
                         </td>
                         <td class="tbl-mono tbl-right">
                             {{ formatAmount(rec.attributes?.transactions?.[0]) }}
                         </td>
-                        <td>{{ freqLabel(rec.attributes?.repeat_freq) }}</td>
-                        <td>{{ rec.attributes?.next_recurrence ?? '—' }}</td>
+                        <td>{{ freqLabel(rec.attributes?.repetitions?.[0]) }}</td>
+                        <td>{{ nextDate(rec.attributes?.repetitions?.[0]) }}</td>
                         <td style="text-align: center">
                             <FfBadge :variant="rec.attributes?.active ? 'positive' : 'default'">
                                 {{ rec.attributes?.active ? 'Yes' : 'No' }}
@@ -85,8 +85,17 @@ const freqLabels = {
     yearly: 'Yearly',
 };
 
-function freqLabel(val) {
-    return freqLabels[val] ?? val ?? '—';
+function freqLabel(repetition) {
+    if (!repetition) return '—';
+    // use the human-readable description if available, otherwise map the type key
+    if (repetition.description) return repetition.description;
+    return freqLabels[repetition.type] ?? repetition.type ?? '—';
+}
+
+function nextDate(repetition) {
+    const occ = repetition?.occurrences?.[0];
+    if (!occ) return '—';
+    return new Date(occ).toLocaleDateString();
 }
 
 function formatAmount(tx) {
