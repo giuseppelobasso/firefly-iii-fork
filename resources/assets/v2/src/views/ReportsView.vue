@@ -19,7 +19,8 @@
                 Account balances
             </h2>
             <div class="ff-card">
-                <LineChart :data="accountChartData" :loading="loadingAccounts" :height="320" />
+                <div v-if="!loadingAccounts && !accountChartData.length" class="chart-empty">No account data for this period.</div>
+                <LineChart v-else :data="accountChartData" :loading="loadingAccounts" :height="320" />
             </div>
         </section>
 
@@ -45,7 +46,9 @@
                     Income by category
                 </h2>
                 <div class="ff-card">
+                    <div v-if="!loadingInsight && !incomeByCategoryData.length" class="chart-empty">No categorised income for this period.</div>
                     <DoughnutChart
+                        v-else
                         :data="incomeByCategoryData"
                         :loading="loadingInsight"
                         :height="260"
@@ -240,6 +243,13 @@ watch([() => prefs.start, () => prefs.end], reload);
 
 .report-section {
     margin-bottom: 28px;
+}
+
+.chart-empty {
+    padding: 40px;
+    text-align: center;
+    color: var(--ff-text-muted);
+    font-size: 13px;
 }
 
 .report-row {

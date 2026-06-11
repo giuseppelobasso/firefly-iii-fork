@@ -99,12 +99,10 @@ function draw() {
     if (!canvas.value || !props.data.length) return;
     const cfg = buildConfig(props.data);
     if (chartInstance) {
-        chartInstance.data = cfg.data;
-        chartInstance.options = cfg.options;
-        chartInstance.update();
-    } else {
-        chartInstance = new Chart(canvas.value, cfg);
+        chartInstance.destroy();
+        chartInstance = null;
     }
+    chartInstance = new Chart(canvas.value, cfg);
 }
 
 onMounted(draw);

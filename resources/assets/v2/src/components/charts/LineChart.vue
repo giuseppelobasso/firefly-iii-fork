@@ -79,10 +79,10 @@ function draw() {
     if (!canvas.value || !props.data.length) return;
     const cfg = buildConfig(props.data);
     if (chartInstance) {
-        chartInstance.data = cfg.data;
-        chartInstance.options = cfg.options;
-        chartInstance.update();
-    } else {
+        chartInstance.destroy();
+        chartInstance = null;
+    }
+    if (props.data.length) {
         chartInstance = new Chart(canvas.value, cfg);
     }
 }
