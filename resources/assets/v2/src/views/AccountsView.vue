@@ -18,6 +18,34 @@
         <!-- Notifications -->
         <NotificationBar :error="notif.error.value" :success="notif.success.value" @close="notif.clear()" />
 
+        <!-- Create account modal -->
+        <div v-if="showCreate" class="ff-modal-backdrop" @click.self="showCreate = false">
+            <div class="ff-modal">
+                <h2 class="ff-modal-title">New {{ typeLabel }} account</h2>
+                <form @submit.prevent="createAccount">
+                    <div class="form-row">
+                        <label class="form-label">Name *</label>
+                        <input v-model="newAccount.name" class="ff-input" placeholder="Account name" required />
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">IBAN</label>
+                        <input v-model="newAccount.iban" class="ff-input" placeholder="IBAN (optional)" />
+                    </div>
+                    <div class="form-row">
+                        <label class="form-label">Opening balance</label>
+                        <input v-model="newAccount.opening_balance" type="number" step="0.01" class="ff-input" placeholder="0.00" />
+                    </div>
+                    <div class="ff-modal-actions">
+                        <button type="button" class="ff-btn ff-btn-secondary" @click="showCreate = false">Cancel</button>
+                        <button type="submit" class="ff-btn ff-btn-primary" :disabled="creating">
+                            <i v-if="creating" class="fa-solid fa-spinner fa-spin"></i>
+                            Create
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <!-- Table -->
         <div class="ff-card">
             <div v-if="store.loading" class="view-loading">
@@ -83,6 +111,29 @@ const route = useRoute();
 const store = useAccountsStore();
 const notif = useNotifications();
 const showCreate = ref(false);
+const creating = ref(false);
+const newAccount = ref({name: '', iban: '', opening_balance: ''});
+
+async function createAccount() {
+    creating.value = true;
+    try {
+        await store.store({
+            name: newAccount.value.name,
+            type: route.params.type === 'liabilities' ? 'liability' : route.params.type,
+            iban: newAccount.value.iban || null,
+            opening_balance: newAccount.value.opening_balance || '0',
+            opening_balance_date: new Date().toISOString().slice(0, 10),
+            currency_code: 'EUR',
+        });
+        notif.showSuccess(`Account "${newAccount.value.name}" created.`);
+        showCreate.value = false;
+        newAccount.value = {name: '', iban: '', opening_balance: ''};
+    } catch (e) {
+        notif.showError(e.response?.data?.message ?? e.message);
+    } finally {
+        creating.value = false;
+    }
+}
 
 const TYPES = {
     asset: {label: 'Asset', icon: 'fa-solid fa-wallet'},
@@ -143,5 +194,14 @@ watch(() => route.params.type, load);
 .ff-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 13.5px; font-weight: 500; cursor: pointer; border: none; text-decoration: none; transition: filter .15s; }
 .ff-btn:hover { filter: brightness(1.1); }
 .ff-btn-primary { background: var(--ff-sidebar-accent); color: #fff; }
+.ff-btn-secondary { background: var(--ff-border); color: var(--ff-text); }
+
+.ff-modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.ff-modal { background: var(--ff-card-bg, #fff); border-radius: 12px; padding: 24px; width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+.ff-modal-title { font-size: 18px; font-weight: 600; margin-bottom: 16px; }
+.form-row { margin-bottom: 14px; }
+.form-label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 4px; color: var(--ff-text-muted); }
+.ff-input { width: 100%; padding: 8px 12px; border: 1px solid var(--ff-border); border-radius: 6px; font-size: 14px; background: var(--ff-bg); color: var(--ff-text); }
+.ff-modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
 </style>
 
