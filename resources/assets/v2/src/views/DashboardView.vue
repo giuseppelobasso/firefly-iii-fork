@@ -51,7 +51,7 @@
 </template>
 
 <script setup>
-import {onMounted, watch} from 'vue';
+import {computed, onMounted, watch} from 'vue';
 import {RouterLink} from 'vue-router';
 import {useDashboardStore} from '../stores/dashboard.js';
 import {usePreferencesStore} from '../stores/preferences.js';
@@ -64,12 +64,36 @@ import DashboardPiggies from '../components/dashboard/DashboardPiggies.vue';
 const store = useDashboardStore();
 const prefs = usePreferencesStore();
 
-const summaryBoxes = [
-    {key: 'balance', label: 'Net worth', icon: 'fa-solid fa-scale-balanced', variant: 'neutral'},
-    {key: 'earned', label: 'Earned', icon: 'fa-solid fa-arrow-trend-up', variant: 'positive'},
-    {key: 'spent', label: 'Spent', icon: 'fa-solid fa-arrow-trend-down', variant: 'negative'},
-    {key: 'saved', label: 'Saved', icon: 'fa-solid fa-piggy-bank', variant: 'positive'},
-];
+// Find the first entry in store.summary whose key starts with the given prefix.
+function findSummaryEntry(prefix) {
+    const entry = Object.values(store.summary).find(e => e?.key?.startsWith(prefix));
+    return entry ?? null;
+}
+
+const summaryBoxes = computed(() => {
+    const netWorth = findSummaryEntry('net-worth-in-');
+    const earned   = findSummaryEntry('earned-in-');
+    const spent    = findSummaryEntry('spent-in-');
+    const saved    = findSummaryEntry('balance-in-');
+    return [
+        {
+            key: 'net-worth', label: 'Net worth', icon: 'fa-solid fa-scale-balanced', variant: 'neutral',
+            value: netWorth?.monetary_value ?? null, currency: netWorth?.currency_code ?? 'EUR',
+        },
+        {
+            key: 'earned', label: 'Earned', icon: 'fa-solid fa-arrow-trend-up', variant: 'positive',
+            value: earned?.monetary_value ?? null, currency: earned?.currency_code ?? 'EUR',
+        },
+        {
+            key: 'spent', label: 'Spent', icon: 'fa-solid fa-arrow-trend-down', variant: 'negative',
+            value: spent?.monetary_value ?? null, currency: spent?.currency_code ?? 'EUR',
+        },
+        {
+            key: 'saved', label: 'Saved', icon: 'fa-solid fa-piggy-bank', variant: 'positive',
+            value: saved?.monetary_value ?? null, currency: saved?.currency_code ?? 'EUR',
+        },
+    ];
+});
 
 function load() {
     store.loadAll(prefs.start, prefs.end);
