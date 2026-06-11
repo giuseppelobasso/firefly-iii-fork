@@ -26,8 +26,8 @@
                     <div class="detail-row">
                         <dt>Type</dt>
                         <dd>
-                            <FfBadge :variant="typeVariant(tx?.type)">
-                                {{ tx?.type ?? '—' }}
+                            <FfBadge :variant="typeVariant(store.current.attributes?.type)">
+                                {{ store.current.attributes?.type ?? '—' }}
                             </FfBadge>
                         </dd>
                     </div>
@@ -37,15 +37,15 @@
                     </div>
                     <div class="detail-row">
                         <dt>Frequency</dt>
-                        <dd>{{ freqLabel(store.current.attributes?.repeat_freq) }}</dd>
+                        <dd>{{ freqLabel(store.current.attributes?.repetitions?.[0]) }}</dd>
                     </div>
                     <div class="detail-row">
                         <dt>First date</dt>
-                        <dd>{{ store.current.attributes?.first_date ?? '—' }}</dd>
+                        <dd>{{ store.current.attributes?.first_date ? new Date(store.current.attributes.first_date).toLocaleDateString() : '—' }}</dd>
                     </div>
                     <div class="detail-row">
                         <dt>Next occurrence</dt>
-                        <dd>{{ store.current.attributes?.next_recurrence ?? '—' }}</dd>
+                        <dd>{{ nextDate(store.current.attributes?.repetitions?.[0]) }}</dd>
                     </div>
                     <div class="detail-row">
                         <dt>Active</dt>
@@ -128,8 +128,16 @@ const freqLabels = {
     yearly: 'Yearly',
 };
 
-function freqLabel(val) {
-    return freqLabels[val] ?? val ?? '—';
+function freqLabel(repetition) {
+    if (!repetition) return '—';
+    if (repetition.description) return repetition.description;
+    return freqLabels[repetition.type] ?? repetition.type ?? '—';
+}
+
+function nextDate(repetition) {
+    const occ = repetition?.occurrences?.[0];
+    if (!occ) return '—';
+    return new Date(occ).toLocaleDateString();
 }
 
 function typeVariant(type) {
