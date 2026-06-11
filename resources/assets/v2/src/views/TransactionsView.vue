@@ -19,8 +19,8 @@
         <div class="ff-card">
             <!-- Filters -->
             <div class="tx-filters">
-                <input type="date" class="ff-input" :value="store.start" @change="store.start = $event.target.value; reload()" />
-                <input type="date" class="ff-input" :value="store.end" @change="store.end = $event.target.value; reload()" />
+                <input type="date" class="ff-input" :value="toDateStr(store.start)" @change="store.start = $event.target.value; reload()" />
+                <input type="date" class="ff-input" :value="toDateStr(store.end)" @change="store.end = $event.target.value; reload()" />
             </div>
 
             <div v-if="store.loading" class="view-loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading…</div>
@@ -98,6 +98,12 @@ const typeLabel = computed(() => TYPE_LABELS[route.params.type] ?? route.params.
 function formatDate(d) {
     if (!d) return '—';
     return new Date(d).toLocaleDateString();
+}
+
+function toDateStr(d) {
+    if (!d) return '';
+    if (typeof d === 'string') return d.slice(0, 10);
+    return d.toISOString().slice(0, 10);
 }
 
 function amountClass(tx) {

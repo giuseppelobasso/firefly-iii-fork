@@ -58,7 +58,7 @@ class SecureHeaders
             "default-src 'none'",
             "object-src 'none'",
             // sha256 hash = Vite modulepreload polyfill (static content, always identical)
-            sprintf("script-src 'unsafe-eval' 'strict-dynamic' 'nonce-%1s' 'sha256-2qlkOwg2hcsVOfukKgRb/6GzdP9l92GZL+eLDfPxnlA='", $nonce),
+            sprintf("script-src 'unsafe-eval' 'strict-dynamic' 'nonce-%1s' 'sha256-2qlkOwg2hcsVOfukKgRb/6GzdP9l92GZL+eLDfPxnlA=' 'sha256-h4nVw8heFeKxkbjqPxAN1pwltq0oMve5yNJotByK7Z8='", $nonce),
             // sprintf("style-src 'self' 'nonce-%1s'", $nonce), // safe variant
             "style-src 'self' 'unsafe-inline'", // unsafe variant
             "base-uri 'self'",
@@ -76,7 +76,7 @@ class SecureHeaders
                 "default-src 'none'",
                 "object-src 'none'",
                 // sha256 hash = Vite modulepreload polyfill (static content, always identical)
-                sprintf("script-src 'unsafe-eval' 'strict-dynamic' 'nonce-%1s' 'sha256-2qlkOwg2hcsVOfukKgRb/6GzdP9l92GZL+eLDfPxnlA='", $nonce),
+                sprintf("script-src 'unsafe-eval' 'strict-dynamic' 'nonce-%1s' 'sha256-2qlkOwg2hcsVOfukKgRb/6GzdP9l92GZL+eLDfPxnlA=' 'sha256-h4nVw8heFeKxkbjqPxAN1pwltq0oMve5yNJotByK7Z8='", $nonce),
                 //                 sprintf("style-src 'self' 'nonce-%1s' https://10.0.0.15:5173/", $nonce), // safe variant
                 sprintf("style-src 'self' 'unsafe-inline' https://%s:5173/", $ip), // unsafe variant
                 "base-uri 'self'",

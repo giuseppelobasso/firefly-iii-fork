@@ -171,6 +171,13 @@ Route::group(
     }
 );
 
+// ─── SPA Catch-all ──────────────────────────────────────────────────────────
+// Must come BEFORE legacy v1 web controllers so the Vue 3 SPA handles all
+// frontend routes. Only API, OAuth, login, and system routes are excluded.
+Route::middleware(['user-full-auth'])->get('/{any}', static function () {
+    return view('layout.v2');
+})->where('any', '^(?!api|oauth|login|logout|register|password|sanctum|_ignition|_debugbar|build|install|health|error|flush|routes|debug|two-factor).*$');
+
 // show inactive
 
 /*
@@ -1467,9 +1474,3 @@ Route::group(
         //        Route::post('set-order/{bill}', ['uses' => 'Bill\IndexController@setOrder', 'as' => 'set-order']);
     }
 );
-
-// SPA catch-all: any authenticated route not matched above serves the Vue 3 shell.
-// Vue Router handles client-side routing from this point.
-Route::middleware(['user-full-auth'])->get('/{any}', static function () {
-    return view('layout.v2');
-})->where('any', '^(?!api|oauth|login|logout|register|password|sanctum|_ignition|_debugbar|build).*$');
